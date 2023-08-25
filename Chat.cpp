@@ -2,48 +2,52 @@
 
 void Chat::run()
 {
-	std::cout << " Hello! You are welcome to register, or you can enter the chat room if you are already registered.\n";
+	std::cout << "\n Hello! You are welcome to register, or you can enter the chat room if you are already registered.\n";
 	showAllUsers();
-	showStartMenu();
-	if (userCount_ >= 1 && escFromStartMenu_ == true)
-	{
-		showAllUsers();
-		showChatMenu();
-	}
-	showAllMessage();
-}
-
-void Chat::showStartMenu()
-{
-	bool menu = true;
-	char action = '0';
 	do
-	{
-		std::cout << "\n To register press 1, to enter the chat room press 2, press q to exit: ";
+	{	
+		char action = '0';
+		std::cout << "\n To register press 1, to enter the chat room press 2, to log out of the account press 3, press q to exit: ";
 		std::cin >> action;
 		switch (action)
 		{
 		case '1':
-			registration();
+			if (current_registered_user_ != nullptr)
+				std::cout << "\n You are already registered, so you can join the chat room.\n";
+			else
+				registration();
 			break;
 		case '2':
-			if (userCount_ == 0)
+			if (userData_.size() == 0)
 			{
 				std::cout << "\n There's no one in the chat room yet, so register first!\n";
 				break;
 			}
 			authorization();
-			escFromStartMenu_ = true;
-			menu = false;
+			break;
+		case '3':
+			if (current_registered_user_ == nullptr)
+				std::cout << "\n You are not yet registered!\n";
+			else
+			{
+				current_authorized_user_ = nullptr;
+				current_registered_user_ = nullptr;
+			}
 			break;
 		case 'q':
-			std::cout << "\n Goodbye!\n";
-			menu = false;
+			atWork = false;
 			break;
 		default:
 			std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
 		}
-	} while (menu);
+		
+		if (current_authorized_user_)
+		{
+			showAllUsers();
+			showChatMenu();
+		}
+	} while (atWork);
+	std::cout << "\n Goodbye!\n";
 }
 
 void Chat::showChatMenu()
@@ -52,17 +56,20 @@ void Chat::showChatMenu()
 	char action = '0';
 	do
 	{
-		std::cout << "\n To write a public message press 1, to go to the dialog press 2, to return to the start menu press q: ";
+		std::cout << "\n To write a public message press 1, to go to the dialog press 2, to view chat press 3, press q to exit from chat menu: ";
 		std::cin >> action;
 		switch (action)
 		{
 		case '1':
+			openDialog_ = false;
 			sendMessage();
-			showAllMessage();
 			break;
 		case '2':
 			openDialog_ = true;
 			sendMessage();
+			break;
+		case '3':
+			showAllMessage();
 			break;
 		case 'q':
 			menu = false;
@@ -85,36 +92,60 @@ void Chat::registration()
 	std::cout << "\n Enter your chat name: ";
 	std::cin >> name;
 	User user(login, password, name);
-	userData_.push_back(user);
-	++userCount_;
+	if (userData_.size() != 0)
+	{
+		bool match = false;
+		for (const auto& u : userData_)
+		{
+			if (user.getLogin() == u.getLogin())
+				match = true;
+		}
+		if(match == true)
+			std::cout << "\n This login is already taken!\n";
+		else
+		{
+			userData_.push_back(user);
+			current_registered_user_ = &user;
+		}
+	}
+	else
+	{
+		userData_.push_back(user);
+		current_registered_user_ = &user;
+	}
 }
 
 void Chat::authorization()
 {
-	bool check = false;
-	std::string login;
-	std::string password;
-	do
+	if(current_registered_user_ == nullptr)
+		std::cout << "\n You are not yet registered!\n";
+	else
 	{
-		std::cout << "\n Enter your login: ";
-		std::cin >> login;
-		std::cout << "\n Enter your password: ";
-		std::cin >> password;
-		for (auto& user : userData_)
+		bool match = false;
+		std::string login;
+		std::string password;
+		do
 		{
-			if (user.signIn(login, password) == nullptr)
-				continue;
-			else
+			std::cout << "\n Enter your login: ";
+			std::cin >> login;
+			std::cout << "\n Enter your password: ";
+			std::cin >> password;
+			for (auto& user : userData_)
 			{
-				currentUser_ = user.signIn(login, password);
-				check = true;
+				if (user.signIn(login, password) == nullptr)
+					continue;
+				else
+				{
+					current_authorized_user_ = user.signIn(login, password);
+					match = true;
+				}
 			}
-		}
-		if (!check)
-			std::cout << "\n Invalid login or password!" << std::endl;
-		else
-			std::cout << "\n Welcome to the chat room!" << std::endl;
-	} while (!check);
+			if (!match)
+				std::cout << "\n Invalid login or password!" << std::endl;
+			else
+				std::cout << "\n Welcome to the chat room!" << std::endl;
+		} while (!match);
+	}
 }
 
 void Chat::sendMessage()
@@ -126,7 +157,7 @@ void Chat::sendMessage()
 		std::cout << "\n Message: ";
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		std::getline(std::cin, text);
-		Message msg(text, currentUser_, recipient);
+		Message msg(text, current_authorized_user_, recipient);
 		publicMsgData_.push_back(msg);
 	}
 	else
@@ -144,7 +175,7 @@ void Chat::sendMessage()
 				check = true;
 		}
 		if (!check)
-			std::cout << "\n User with this login is not in the chat room!\n" << std::endl;
+			std::cout << "\n User with this login is not in the chat room!\n";
 		else
 		{
 			do
@@ -157,7 +188,7 @@ void Chat::sendMessage()
 					std::cout << "\n Message: ";
 					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::getline(std::cin, text);
-					Message msg(text, currentUser_, recipient);
+					Message msg(text, current_authorized_user_, recipient);
 					privateMsgData_.push_back(msg);
 				}
 				else if (query == '2')
@@ -174,13 +205,11 @@ void Chat::sendMessage()
 
 void Chat::showAllUsers()
 {
-	int number = 1;
-	std::string pers = "user";
-	if (userCount_ == 1)
-		std::cout << "\n Now in chat room " << userCount_ << " " + pers << std::endl;
+	if (userData_.size() == 1)
+		std::cout << "\n Now in chat room " << userData_.size() << " user\n";
 	else
-		std::cout << "\n Now in chat room " << userCount_ << " " + pers + "s" << std::endl;
-
+		std::cout << "\n Now in chat room " << userData_.size() << " users\n";
+	int number = 1;
 	for (const auto& user : userData_)
 	{
 		std::cout << "\n " << number << ") " << user;
@@ -190,13 +219,25 @@ void Chat::showAllUsers()
 
 void Chat::showAllMessage()
 {
-	for (const auto& msg : publicMsgData_)
-		std::cout << msg;
+	if (publicMsgData_.size() == 0)
+		std::cout << "\n There are no messages in the chat room yet!\n";
+	else
+	{
+		for (const auto& msg : publicMsgData_)
+			std::cout << msg;
+	}
 }
 
 void Chat::showDialog(const std::string& recipient)
 {
-	for (const auto& msg : privateMsgData_)
-		if(msg.getRecipient() == recipient)
-			std::cout << msg;
+	if (privateMsgData_.size() == 0)
+		std::cout << "\n There are no messages in this dialog yet!\n";
+	else
+	{
+		for (const auto& msg : privateMsgData_)
+		{
+			if (msg.getRecipient() == recipient)
+				std::cout << msg;
+		}
+	}
 }

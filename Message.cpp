@@ -16,5 +16,5 @@ const std::string& Message::getSendinTime() const { return sendinTime_; }
 
 std::ostream& operator << (std::ostream& os, const Message& msg)
 {
-    return os << "Message from: " << msg.getSender() << "\nto: " << msg.getRecipient() << "\nmessage text: " << msg.getText() << "\nposted at: " << msg.getSendinTime() << std::endl;
+    return os << "\n from: " << msg.getSender() << "\t" << msg.getText() << "\tposted at: " << msg.getSendinTime() << std::endl;
 }
