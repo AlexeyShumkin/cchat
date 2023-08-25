@@ -14,9 +14,11 @@ public:
 	void showStartMenu();
 	void showChatMenu();
 private:
-	bool escFromMenu_ = false;
-	std::vector<User> userData_;
-	std::vector<Message> msgData_;
-	User* currentUser_ = nullptr;
 	int userCount_ = 0;
+	bool escFromStartMenu_ = false;
+	bool openDialog_ = false;
+	User* currentUser_ = nullptr;
+	std::vector<User> userData_;
+	std::vector<Message> publicMsgData_;
+	std::vector<Message> privateMsgData_;
 };

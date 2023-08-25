@@ -5,11 +5,12 @@ void Chat::run()
 	std::cout << " Hello! You are welcome to register, or you can enter the chat room if you are already registered.\n";
 	showAllUsers();
 	showStartMenu();
-	if (userCount_ >= 1 && escFromMenu_ == true)
+	if (userCount_ >= 1 && escFromStartMenu_ == true)
 	{
 		showAllUsers();
 		showChatMenu();
 	}
+	showAllMessage();
 }
 
 void Chat::showStartMenu()
@@ -32,7 +33,7 @@ void Chat::showStartMenu()
 				break;
 			}
 			authorization();
-			escFromMenu_ = true;
+			escFromStartMenu_ = true;
 			menu = false;
 			break;
 		case 'q':
@@ -56,9 +57,11 @@ void Chat::showChatMenu()
 		switch (action)
 		{
 		case '1':
-			std::cout << "l\n";
+			sendMessage();
+			showAllMessage();
 			break;
 		case '2':
+			openDialog_ = true;
 			sendMessage();
 			break;
 		case 'q':
@@ -116,38 +119,52 @@ void Chat::authorization()
 
 void Chat::sendMessage()
 {
-	bool check = false;
-	std::string recipient;
-	std::cout << "\n Enter the recipient login: ";
-	std::cin >> recipient;
-	for (const auto& user : userData_)
+	if (openDialog_ == false)
 	{
-		if (recipient != user.getLogin())
-			continue;
-		else
-			check = true;
-	}
-	if (!check)
-		std::cout << "\n User with this login is not in the chat room!" << std::endl;
-	else
-	{
+		std::string recipient = "All";
 		std::string text;
-		std::cout << "\n Message...\n";
+		std::cout << "\n Message: ";
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		std::getline(std::cin, text);
 		Message msg(text, currentUser_, recipient);
-		msgData_.push_back(msg);
+		publicMsgData_.push_back(msg);
 	}
+	else
+	{
+		bool check = false;
+		std::string recipient;
+		std::cout << "\n Enter the recipient login: ";
+		std::cin >> recipient;
+		for (const auto& user : userData_)
+		{
+			if (recipient != user.getLogin())
+				continue;
+			else
+				check = true;
+		}
+		if (!check)
+			std::cout << "\n User with this login is not in the chat room!" << std::endl;
+		else
+		{
+			std::string text;
+			std::cout << "\n Message: ";
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			std::getline(std::cin, text);
+			Message msg(text, currentUser_, recipient);
+			privateMsgData_.push_back(msg);
+		}
+	}
+	openDialog_ = false;
 }
 
 void Chat::showAllUsers()
 {
 	int number = 1;
-	std::string pers = "person";
-	if (userCount_ > 1)
-		std::cout << "\n Now in chat room " << userCount_ << " " + pers + "s" << std::endl;
-	else
+	std::string pers = "user";
+	if (userCount_ == 1)
 		std::cout << "\n Now in chat room " << userCount_ << " " + pers << std::endl;
+	else
+		std::cout << "\n Now in chat room " << userCount_ << " " + pers + "s" << std::endl;
 
 	for (const auto& user : userData_)
 	{
@@ -158,6 +175,6 @@ void Chat::showAllUsers()
 
 void Chat::showAllMessage()
 {
-	for (const auto& msg : msgData_)
+	for (const auto& msg : publicMsgData_)
 		std::cout << msg;
 }
