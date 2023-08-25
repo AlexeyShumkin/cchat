@@ -13,7 +13,7 @@ void Chat::run()
 		{
 		case '1':
 			if (current_registered_user_ != nullptr)
-				std::cout << "\n You are already registered, so you can join the chat room.\n";
+				std::cout << "\n You are already registered! Authorization required to enter the chat room.\n";
 			else
 				registration();
 			break;
@@ -44,6 +44,7 @@ void Chat::run()
 			}
 			break;
 		case 'q':
+			current_authorized_user_ = nullptr;
 			atWork = false;
 			break;
 		default:
@@ -221,8 +222,13 @@ void Chat::showAllUsers()
 	int number = 1;
 	for (const auto& user : userData_)
 	{
-		std::cout << "\n " << number << ") " << user;
-		++number;
+		if (current_authorized_user_ == &user)
+			std::cout << "\n " << number << ") " << user << " <-you\n";
+		else
+		{
+			std::cout << "\n " << number << ") " << user << "\n";
+			++number;
+		}
 	}
 }
 
@@ -233,7 +239,7 @@ void Chat::showAllMessage()
 	else
 	{
 		for (const auto& msg : publicMsgData_)
-			std::cout << msg;
+			std::cout << "\n From: " << msg.getSender() << "\t" << msg;
 	}
 }
 
@@ -246,7 +252,7 @@ void Chat::showDialog(const std::string& recipient)
 		for (const auto& msg : privateMsgData_)
 		{
 			if (msg.getRecipient() == recipient)
-				std::cout << msg;
+				std::cout << "\n To: " << msg.getRecipient() << "\t" << msg;
 		}
 	}
 }
