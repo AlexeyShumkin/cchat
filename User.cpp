@@ -1,8 +1,6 @@
 #include"User.h"
 
 User::User(const std::string& login, const std::string& password, const std::string& name) :login_(login), password_(password), name_(name) {}
-//User::~User() { std::cout << this << "User destructor has called\n"; }
-
 void User::setLogin(const std::string& login) { login_ = login; }
 const std::string& User::getLogin() const { return login_; }
 void User::setPassword(const std::string& password) { password_ = password; }

@@ -6,8 +6,6 @@ class User
 {
 public:
 	User(const std::string& login, const std::string& password, const std::string& name);
-	/*~User();*/
-
 	void setLogin(const std::string& login);
 	const std::string& getLogin() const;
 	void setPassword(const std::string& password);
@@ -15,9 +13,7 @@ public:
 	void setName(const std::string& name);
 	const std::string& getName() const;
 	bool getConnection() const;
-
 	User* signIn(const std::string& login, const std::string& password);
-
 private:
 	bool connection_ = false;
 	std::string login_;

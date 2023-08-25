@@ -7,7 +7,7 @@ void Chat::run()
 	do
 	{	
 		char action = '0';
-		std::cout << "\n To register press 1, to enter the chat room press 2, to log out of the account press 3, press q to exit: ";
+		std::cout << "\n To register press 1, to authorize press 2, to log out of the account press 3, press q to exit: ";
 		std::cin >> action;
 		switch (action)
 		{
@@ -23,15 +23,24 @@ void Chat::run()
 				std::cout << "\n There's no one in the chat room yet, so register first!\n";
 				break;
 			}
-			authorization();
+			if (current_authorized_user_)
+				std::cout << "\n You are already logged in!\n";
+			else
+				authorization();
 			break;
 		case '3':
 			if (current_registered_user_ == nullptr)
-				std::cout << "\n You are not yet registered!\n";
+				std::cout << "\n You are not registered yet!\n";
 			else
 			{
-				current_authorized_user_ = nullptr;
-				current_registered_user_ = nullptr;
+				if(current_authorized_user_ == nullptr)
+					std::cout << "\n You are not authorized yet!\n";
+				else
+				{
+					std::cout << "\n user " << current_authorized_user_->getLogin() << " left the chat room.\n";
+					current_authorized_user_ = nullptr;
+					current_registered_user_ = nullptr;
+				}
 			}
 			break;
 		case 'q':
@@ -118,7 +127,7 @@ void Chat::registration()
 void Chat::authorization()
 {
 	if(current_registered_user_ == nullptr)
-		std::cout << "\n You are not yet registered!\n";
+		std::cout << "\n You are not registered yet!\n";
 	else
 	{
 		bool match = false;
@@ -152,7 +161,7 @@ void Chat::sendMessage()
 {
 	if (openDialog_ == false)
 	{
-		std::string recipient = "All";
+		std::string recipient = "all";
 		std::string text;
 		std::cout << "\n Message: ";
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -206,9 +215,9 @@ void Chat::sendMessage()
 void Chat::showAllUsers()
 {
 	if (userData_.size() == 1)
-		std::cout << "\n Now in chat room " << userData_.size() << " user\n";
+		std::cout << "\n Now in chat room " << userData_.size() << " user.\n";
 	else
-		std::cout << "\n Now in chat room " << userData_.size() << " users\n";
+		std::cout << "\n Now in chat room " << userData_.size() << " users.\n";
 	int number = 1;
 	for (const auto& user : userData_)
 	{

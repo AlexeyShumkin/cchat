@@ -4,9 +4,6 @@ Message::Message(const std::string& text, User* sender, const std::string& recip
 {
 
 }
-//Message::Message(const std::string& text, const std::string& sender, const std::string& recipient, const std::string& sendingTime) : text_(text), sender_(sender), recipient_(recipient), sendinTime_(sendingTime) {}
-//Message::~Message() { std::cout << this << "Message destructor has called\n"; }
-
 
 void Message::setText(const std::string& text) { text_ = text; }
 const std::string& Message::getText() const { return text_; }
@@ -16,5 +13,5 @@ const std::string& Message::getSendinTime() const { return sendinTime_; }
 
 std::ostream& operator << (std::ostream& os, const Message& msg)
 {
-    return os << "\n from: " << msg.getSender() << "\t" << msg.getText() << "\tposted at: " << msg.getSendinTime() << std::endl;
+    return os << "\n from: " << msg.getSender() << "\t\t" << msg.getText() << "\tposted at: " << msg.getSendinTime() << std::endl;
 }
