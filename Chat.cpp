@@ -41,7 +41,7 @@ void Chat::showStartMenu()
 			menu = false;
 			break;
 		default:
-			std::cout << "\n I apologize, I didn't understand what you meant.\n";
+			std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
 		}
 	} while (menu);
 }
@@ -68,7 +68,7 @@ void Chat::showChatMenu()
 			menu = false;
 			break;
 		default:
-			std::cout << "\n I apologize, I didn't understand what you meant.\n";
+			std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
 		}
 	} while (menu);
 }
@@ -132,6 +132,7 @@ void Chat::sendMessage()
 	else
 	{
 		bool check = false;
+		std::string text;
 		std::string recipient;
 		std::cout << "\n Enter the recipient login: ";
 		std::cin >> recipient;
@@ -143,18 +144,32 @@ void Chat::sendMessage()
 				check = true;
 		}
 		if (!check)
-			std::cout << "\n User with this login is not in the chat room!" << std::endl;
+			std::cout << "\n User with this login is not in the chat room!\n" << std::endl;
 		else
 		{
-			std::string text;
-			std::cout << "\n Message: ";
-			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-			std::getline(std::cin, text);
-			Message msg(text, currentUser_, recipient);
-			privateMsgData_.push_back(msg);
+			do
+			{
+				char query = '0';
+				std::cout << "\n to send a message press 1, to view the conversation press 2, to leave the dialog press q: ";
+				std::cin >> query;
+				if (query == '1')
+				{
+					std::cout << "\n Message: ";
+					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+					std::getline(std::cin, text);
+					Message msg(text, currentUser_, recipient);
+					privateMsgData_.push_back(msg);
+				}
+				else if (query == '2')
+					showDialog(recipient);
+				else if (query == 'q')
+					openDialog_ = false;
+				else
+					std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
+
+			} while (openDialog_);
 		}
 	}
-	openDialog_ = false;
 }
 
 void Chat::showAllUsers()
@@ -177,4 +192,11 @@ void Chat::showAllMessage()
 {
 	for (const auto& msg : publicMsgData_)
 		std::cout << msg;
+}
+
+void Chat::showDialog(const std::string& recipient)
+{
+	for (const auto& msg : privateMsgData_)
+		if(msg.getRecipient() == recipient)
+			std::cout << msg;
 }

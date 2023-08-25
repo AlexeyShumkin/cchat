@@ -11,6 +11,7 @@ public:
 	void sendMessage();
 	void showAllUsers();
 	void showAllMessage();
+	void showDialog(const std::string& recipient);
 	void showStartMenu();
 	void showChatMenu();
 private:
