@@ -223,10 +223,10 @@ void Chat::showAllUsers()
 	for (const auto& user : userData_)
 	{
 		if (current_authorized_user_ == &user)
-			std::cout << "\n " << number << ") " << user << " <-you\n";
+			std::cout << "\n " << number << ") " << user << "\tonline\n";
 		else
 		{
-			std::cout << "\n " << number << ") " << user << "\n";
+			std::cout << "\n " << number << ") " << user << "\toffline\n";
 			++number;
 		}
 	}
