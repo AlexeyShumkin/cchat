@@ -14,10 +14,9 @@ public:
 	void showDialog(const std::string& recipient);
 	void showChatMenu();
 private:
-	bool atWork = true;
+	bool atWork_ = true;
 	bool openDialog_ = false;
-	User* current_registered_user_ = nullptr;
-	User* current_authorized_user_ = nullptr;
+	User* currentUser_;
 	std::vector<User> userData_;
 	std::vector<Message> publicMsgData_;
 	std::vector<Message> privateMsgData_;

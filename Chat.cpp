@@ -12,10 +12,12 @@ void Chat::run()
 		switch (action)
 		{
 		case '1':
-			if (current_registered_user_ != nullptr)
-				std::cout << "\n You are already registered! Authorization required to enter the chat room.\n";
-			else
-				registration();
+			if (currentUser_ != nullptr)
+			{
+				std::cout << "\n You are already logged in!\n";
+				break;
+			}
+			registration();
 			break;
 		case '2':
 			if (userData_.size() == 0)
@@ -23,40 +25,42 @@ void Chat::run()
 				std::cout << "\n There's no one in the chat room yet, so register first!\n";
 				break;
 			}
-			if (current_authorized_user_)
-				std::cout << "\n You are already logged in!\n";
-			else
-				authorization();
-			break;
-		case '3':
-			if (current_registered_user_ == nullptr)
-				std::cout << "\n You are not registered yet!\n";
 			else
 			{
-				if(current_authorized_user_ == nullptr)
-					std::cout << "\n You are not authorized yet!\n";
+				if (currentUser_ != nullptr)
+					std::cout << "\n You are already logged in!\n";
 				else
-				{
-					std::cout << "\n user " << current_authorized_user_->getLogin() << " left the chat room.\n";
-					current_authorized_user_ = nullptr;
-					current_registered_user_ = nullptr;
-				}
+					authorization();
+				break;
 			}
-			break;
+		case '3':
+			if (currentUser_ == nullptr)
+			{
+				std::cout << "\n You are not authorized yet!\n";
+				break;
+			}
+			else
+			{
+				std::cout << "\n user " << currentUser_->getLogin() << " left the chat room.\n";
+				currentUser_ = nullptr;
+				break;
+			}
 		case 'q':
-			current_authorized_user_ = nullptr;
-			atWork = false;
+			currentUser_ = nullptr;
+			atWork_ = false;
 			break;
 		default:
 			std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
 		}
 		
-		if (current_authorized_user_)
+		if (currentUser_ == nullptr)
+			continue;
+		else
 		{
 			showAllUsers();
 			showChatMenu();
 		}
-	} while (atWork);
+	} while (atWork_);
 	std::cout << "\n Goodbye!\n";
 }
 
@@ -108,54 +112,46 @@ void Chat::registration()
 		for (const auto& u : userData_)
 		{
 			if (user.getLogin() == u.getLogin())
+			{
 				match = true;
+				break;
+			}
 		}
 		if(match == true)
 			std::cout << "\n This login is already taken!\n";
 		else
-		{
 			userData_.push_back(user);
-			current_registered_user_ = &user;
-		}
 	}
 	else
-	{
 		userData_.push_back(user);
-		current_registered_user_ = &user;
-	}
 }
 
 void Chat::authorization()
 {
-	if(current_registered_user_ == nullptr)
-		std::cout << "\n You are not registered yet!\n";
-	else
+	bool match = false;
+	std::string login;
+	std::string password;
+	do
 	{
-		bool match = false;
-		std::string login;
-		std::string password;
-		do
+		std::cout << "\n Enter your login: ";
+		std::cin >> login;
+		std::cout << "\n Enter your password: ";
+		std::cin >> password;
+		for (auto& user : userData_)
 		{
-			std::cout << "\n Enter your login: ";
-			std::cin >> login;
-			std::cout << "\n Enter your password: ";
-			std::cin >> password;
-			for (auto& user : userData_)
-			{
-				if (user.signIn(login, password) == nullptr)
-					continue;
-				else
-				{
-					current_authorized_user_ = user.signIn(login, password);
-					match = true;
-				}
-			}
-			if (!match)
-				std::cout << "\n Invalid login or password!" << std::endl;
+			if (login != user.getLogin() && password != user.getPassword())
+				continue;
 			else
-				std::cout << "\n Welcome to the chat room!" << std::endl;
-		} while (!match);
-	}
+			{
+				currentUser_ = &user;
+				match = true;
+			}
+		}
+		if (!match)
+			std::cout << "\n Invalid login or password!" << std::endl;
+		else
+			std::cout << "\n Welcome to the chat room!" << std::endl;
+	} while (!match);
 }
 
 void Chat::sendMessage()
@@ -167,7 +163,7 @@ void Chat::sendMessage()
 		std::cout << "\n Message: ";
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		std::getline(std::cin, text);
-		Message msg(text, current_authorized_user_, recipient);
+		Message msg(text, currentUser_, recipient);
 		publicMsgData_.push_back(msg);
 	}
 	else
@@ -198,7 +194,7 @@ void Chat::sendMessage()
 					std::cout << "\n Message: ";
 					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::getline(std::cin, text);
-					Message msg(text, current_authorized_user_, recipient);
+					Message msg(text, currentUser_, recipient);
 					privateMsgData_.push_back(msg);
 				}
 				else if (query == '2')
@@ -215,19 +211,23 @@ void Chat::sendMessage()
 
 void Chat::showAllUsers()
 {
-	if (userData_.size() == 1)
-		std::cout << "\n Now in chat room " << userData_.size() << " user.\n";
-	else
-		std::cout << "\n Now in chat room " << userData_.size() << " users.\n";
 	int number = 1;
-	for (const auto& user : userData_)
+	if (userData_.size() == 0)
+		std::cout << "\n There's no one in the chat room right now.\n";
+	else if (userData_.size() == 1)
+		std::cout << "\n Now in chat room 1 user.\n\n 1)" << userData_[0] << "\tonline\n";
+	else
 	{
-		if (current_authorized_user_ == &user)
-			std::cout << "\n " << number << ") " << user << "\tonline\n";
-		else
+		std::cout << "\n Now in chat room " << userData_.size() << " users.\n";
+		for (const auto& user : userData_)
 		{
-			std::cout << "\n " << number << ") " << user << "\toffline\n";
-			++number;
+			if (currentUser_ == &user)
+				std::cout << "\n " << number << ")" << user << "\tonline\n";
+			else
+			{
+				std::cout << "\n " << number << ")" << user << "\toffline\n";
+				++number;
+			}
 		}
 	}
 }

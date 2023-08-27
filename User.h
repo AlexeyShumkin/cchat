@@ -12,9 +12,8 @@ public:
 	const std::string& getPassword() const;
 	void setName(const std::string& name);
 	const std::string& getName() const;
-	void setConnection(const bool connection);
+	void setConnection(bool connection);
 	bool getConnection() const;
-	User* signIn(const std::string& login, const std::string& password);
 private:
 	bool connection_ = false;
 	std::string login_;
