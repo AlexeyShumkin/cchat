@@ -1,17 +1,18 @@
 #include"Message.h"
 
-Message::Message(const std::string& text, User* sender, const std::string& recipient) : text_(text), sender_(sender->getLogin()), recipient_(recipient)
-{
-
-}
-
+Message::Message(const std::string& text, User* sender, const std::string& recipient) : text_(text), sender_(sender->getLogin()), recipient_(recipient), sendinTime_(currentTime()) {}
 void Message::setText(const std::string& text) { text_ = text; }
 const std::string& Message::getText() const { return text_; }
 const std::string& Message::getSender() const { return sender_; }
 const std::string& Message::getRecipient() const { return recipient_; }
 const std::string& Message::getSendinTime() const { return sendinTime_; }
-
-std::ostream& operator << (std::ostream& os, const Message& msg)
+std::string Message::currentTime() 
 {
-    return os << msg.getText() << "\tposted at: " << msg.getSendinTime() << std::endl;
+    time_t t = time(nullptr);
+    tm now;
+    localtime_s(&now, &t);
+    char buffer[20];
+    strftime(buffer, sizeof(buffer), "%R %d/%m/%Y", &now);
+    return buffer;
 }
+std::ostream& operator << (std::ostream& os, const Message& msg) { return os << msg.getText() << "\t" << msg.getSendinTime() << std::endl; }

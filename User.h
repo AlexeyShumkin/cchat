@@ -21,5 +21,4 @@ private:
 	std::string password_;
 	std::string name_;
 };
-
 std::ostream& operator << (std::ostream& os, const User& user);
