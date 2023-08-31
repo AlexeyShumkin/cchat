@@ -161,8 +161,13 @@ void Chat::sendMessage()
 		std::cout << "\n Message: ";
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		std::getline(std::cin, text);
-		Message msg(text, currentUser_, recipient);
-		publicMsgData_.push_back(msg);
+		if (text == "")
+			std::cout << "\n You can't send an empty message!\n";
+		else
+		{
+			Message msg(text, currentUser_, recipient);
+			publicMsgData_.push_back(msg);
+		}
 	}
 	else
 	{
@@ -192,8 +197,13 @@ void Chat::sendMessage()
 					std::cout << "\n Message: ";
 					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 					std::getline(std::cin, text);
-					Message msg(text, currentUser_, recipient);
-					privateMsgData_.push_back(msg);
+					if (text == "")
+						std::cout << "\n You can't send an empty message!\n";
+					else
+					{
+						Message msg(text, currentUser_, recipient);
+						privateMsgData_.push_back(msg);
+					}
 				}
 				else if (query == '2')
 					showDialog(recipient);
@@ -250,7 +260,7 @@ void Chat::showDialog(const std::string& recipient)
 	{
 		if (msg.getRecipient() == currentUser_->getLogin())
 			std::cout << "\n From: " << msg.getSender() << "\t" << msg;
-		if (msg.getSender() == currentUser_->getLogin())
+		else if (msg.getSender() == currentUser_->getLogin())
 			std::cout << "\n   to: " << recipient << "\t" << msg;
 	}
 }
