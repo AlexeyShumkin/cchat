@@ -81,7 +81,7 @@ void Chat::showChatMenu()
 			sendMessage();
 			break;
 		case '3':
-			showAllMessage();
+			showAllMessages();
 			break;
 		case 'q':
 			menu = false;
@@ -137,7 +137,7 @@ void Chat::authorization()
 		std::cin >> password;
 		for (auto& user : userData_)
 		{
-			if (login != user.getLogin() && password != user.getPassword())
+			if (login != user.getLogin() || password != user.getPassword())
 				continue;
 			else
 			{
@@ -165,8 +165,8 @@ void Chat::sendMessage()
 			std::cout << "\n You can't send an empty message!\n";
 		else
 		{
-			Message msg(text, currentUser_, recipient);
-			publicMsgData_.push_back(msg);
+			Message msg(text, currentUser_->getLogin(), recipient);
+			pubMsgData_.push_back(msg);
 		}
 	}
 	else
@@ -201,8 +201,8 @@ void Chat::sendMessage()
 						std::cout << "\n You can't send an empty message!\n";
 					else
 					{
-						Message msg(text, currentUser_, recipient);
-						privateMsgData_.push_back(msg);
+						Message msg(text, currentUser_->getLogin(), recipient);
+						pvtMsgData_.emplace(std::make_pair(currentUser_->getLogin(), recipient), msg);
 					}
 				}
 				else if (query == '2')
@@ -211,7 +211,6 @@ void Chat::sendMessage()
 					openDialog_ = false;
 				else
 					std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
-
 			} while (openDialog_);
 		}
 	}
@@ -243,24 +242,41 @@ void Chat::showAllUsers()
 	}
 }
 
-void Chat::showAllMessage()
+void Chat::showAllMessages()
 {
-	if (publicMsgData_.size() == 0)
+	if (pubMsgData_.size() == 0)
 		std::cout << "\n There are no messages in the chat room yet!\n";
 	else
 	{
-		for (const auto& msg : publicMsgData_)
-			std::cout << "\n From: " << msg.getSender() << "\t" << msg;
+		for (const auto& msg : pubMsgData_)
+			std::cout << msg;
 	}
 }
 
 void Chat::showDialog(const std::string& recipient)
 {
-	for (const auto& msg : privateMsgData_)
+	auto dialog = pvtMsgData_.find(std::make_pair(currentUser_->getLogin(), recipient));
+	auto reverseDialog = pvtMsgData_.find(std::make_pair(recipient, currentUser_->getLogin()));
+	if (dialog != pvtMsgData_.end() && reverseDialog == pvtMsgData_.end())
 	{
-		if (msg.getRecipient() == currentUser_->getLogin())
-			std::cout << "\n From: " << msg.getSender() << "\t" << msg;
-		else if (msg.getSender() == currentUser_->getLogin())
-			std::cout << "\n   to: " << recipient << "\t" << msg;
+		for (dialog; dialog != pvtMsgData_.end(); ++dialog)
+			std::cout << dialog->second;
 	}
+	else if (reverseDialog != pvtMsgData_.end() && dialog == pvtMsgData_.end())
+	{
+		for (reverseDialog; reverseDialog != pvtMsgData_.end(); ++reverseDialog)
+			std::cout << reverseDialog->second;
+	}
+	else if (dialog != pvtMsgData_.end() && reverseDialog != pvtMsgData_.end())
+	{
+		std::map<std::string, Message> temp;
+		for (dialog; dialog != pvtMsgData_.end(); ++dialog)
+			temp.emplace(dialog->second.getSendinTime(), dialog->second);
+		for (reverseDialog; reverseDialog != pvtMsgData_.end(); ++reverseDialog)
+			temp.emplace(reverseDialog->second.getSendinTime(), reverseDialog->second);
+		for (const auto& t : temp)
+			std::cout << t.second;
+	}
+	else
+		std::cout << "\n There are no messages in this dialog yet!\n";
 }

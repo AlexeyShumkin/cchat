@@ -11,7 +11,7 @@ public:
 	void authorization();
 	void sendMessage();
 	void showAllUsers();
-	void showAllMessage();
+	void showAllMessages();
 	void showDialog(const std::string& recipient);
 	void showChatMenu();
 private:
@@ -19,6 +19,6 @@ private:
 	bool openDialog_ = false;
 	User* currentUser_ = nullptr;
 	std::vector<User> userData_;
-	std::vector<Message> publicMsgData_;
-	std::vector<Message> privateMsgData_;
+	std::vector<Message> pubMsgData_;
+	std::multimap<std::pair<std::string, std::string>, Message> pvtMsgData_;
 };

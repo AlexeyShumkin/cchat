@@ -1,6 +1,6 @@
 #include"Message.h"
 
-Message::Message(const std::string& text, User* sender, const std::string& recipient) : text_(text), sender_(sender->getLogin()), recipient_(recipient), sendinTime_(currentTime()) {}
+Message::Message(const std::string& text, const std::string& sender, const std::string& recipient) : text_(text), sender_(sender), recipient_(recipient), sendinTime_(currentTime()) {}
 
 void Message::setText(const std::string& text) { text_ = text; }
 
@@ -18,8 +18,8 @@ std::string Message::currentTime()
     tm now;
     localtime_s(&now, &t);
     char buffer[20];
-    strftime(buffer, sizeof(buffer), "%R %d/%m/%Y", &now);
+    strftime(buffer, sizeof(buffer), "%X %d/%m/%Y", &now);
     return buffer;
 }
 
-std::ostream& operator << (std::ostream& os, const Message& msg) { return os << msg.getText() << "\t" << msg.getSendinTime() << std::endl; }
+std::ostream& operator << (std::ostream& os, const Message& msg) { return os << "\n From: " << msg.getSender() << "\n to: " << msg.getRecipient() << "\n\n " << msg.getText() << "\n\n " << msg.getSendinTime() << std::endl; }
