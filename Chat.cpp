@@ -12,7 +12,7 @@ void Chat::run()
 		switch (action)
 		{
 		case '1':
-			if (currentUser_ != nullptr)
+			if (currentUser_)
 			{
 				std::cout << "\n You are already logged in!\n";
 				break;
@@ -27,14 +27,14 @@ void Chat::run()
 			}
 			else
 			{
-				if (currentUser_ != nullptr)
+				if (currentUser_)
 					std::cout << "\n You are already logged in!\n";
 				else
 					authorization();
 				break;
 			}
 		case '3':
-			if (currentUser_ == nullptr)
+			if (!currentUser_)
 			{
 				std::cout << "\n You are not authorized yet!\n";
 				break;
@@ -104,7 +104,7 @@ void Chat::registration()
 	std::cout << "\n Enter your chat name: ";
 	std::cin >> name;
 	User newUser(login, password, name);
-	if (userData_.size() != 0)
+	if (userData_.size())
 	{
 		bool match = false;
 		for (const auto& user : userData_)
@@ -115,7 +115,7 @@ void Chat::registration()
 				break;
 			}
 		}
-		if(match == true)
+		if(match)
 			std::cout << "\n This login is already taken!\n";
 		else
 			userData_.push_back(newUser);
@@ -143,6 +143,7 @@ void Chat::authorization()
 			{
 				currentUser_ = &user;
 				match = true;
+				break;
 			}
 		}
 		if (!match)
@@ -154,7 +155,7 @@ void Chat::authorization()
 
 void Chat::sendMessage()
 {
-	if (openDialog_ == false)
+	if (!openDialog_)
 	{
 		std::string recipient = "all";
 		std::string text;
@@ -176,49 +177,54 @@ void Chat::sendMessage()
 		std::string recipient;
 		std::cout << "\n Enter the recipient login: ";
 		std::cin >> recipient;
-		for (const auto& user : userData_)
-		{
-			if (recipient != user.getLogin())
-				continue;
-			else
-				check = true;
-		}
-		if (!check)
-			std::cout << "\n User with this login is not in the chat room!\n";
+		if (recipient == currentUser_->getLogin())
+			std::cout << "\n The developer decided to eliminate the ability of users to send messages to themselves :)\n";
 		else
 		{
-			do
+			for (const auto& user : userData_)
 			{
-				char query = '0';
-				std::cout << "\n to send a message press 1, to view the conversation press 2, to leave the dialog press q: ";
-				std::cin >> query;
-				if (query == '1')
-				{
-					std::cout << "\n Message: ";
-					std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-					std::getline(std::cin, text);
-					if (text == "")
-						std::cout << "\n You can't send an empty message!\n";
-					else
-					{
-						Message msg(text, currentUser_->getLogin(), recipient);
-						pvtMsgData_.emplace(std::make_pair(currentUser_->getLogin(), recipient), msg);
-					}
-				}
-				else if (query == '2')
-					showDialog(recipient);
-				else if (query == 'q')
-					openDialog_ = false;
+				if (recipient != user.getLogin())
+					continue;
 				else
-					std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
-			} while (openDialog_);
+					check = true;
+			}
+			if (!check)
+				std::cout << "\n User with this login is not in the chat room!\n";
+			else
+			{
+				do
+				{
+					char query = '0';
+					std::cout << "\n to send a message press 1, to view the conversation press 2, to leave the dialog press q: ";
+					std::cin >> query;
+					if (query == '1')
+					{
+						std::cout << "\n Message: ";
+						std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+						std::getline(std::cin, text);
+						if (text == "")
+							std::cout << "\n You can't send an empty message!\n";
+						else
+						{
+							Message msg(text, currentUser_->getLogin(), recipient);
+							pvtMsgData_.emplace(std::make_pair(currentUser_->getLogin(), recipient), msg);
+						}
+					}
+					else if (query == '2')
+						showDialog(recipient);
+					else if (query == 'q')
+						openDialog_ = false;
+					else
+						std::cout << "\n Your command is unclear. Please, select an action from the list.\n";
+				} while (openDialog_);
+			}
 		}
 	}
 }
 
 void Chat::showAllUsers()
 {
-	if (userData_.size() == 0)
+	if (!userData_.size())
 		std::cout << "\n There's no one in the chat room right now.\n";
 	else if (userData_.size() == 1)
 		std::cout << "\n Now in chat room 1 user:\n\n 1) " << userData_[0] << "\tonline\n";
@@ -244,7 +250,7 @@ void Chat::showAllUsers()
 
 void Chat::showAllMessages()
 {
-	if (pubMsgData_.size() == 0)
+	if (!pubMsgData_.size())
 		std::cout << "\n There are no messages in the chat room yet!\n";
 	else
 	{
