@@ -8,6 +8,8 @@ void Chat::run()
 	{	
 		char action = '0';
 		std::cout << "\n To register press 1, to authorize press 2, to log out of the account press 3, press q to exit: ";
+		std::cin.clear();
+		std::cin.ignore(std::cin.rdbuf()->in_avail());
 		std::cin >> action;
 		switch (action)
 		{
@@ -20,7 +22,7 @@ void Chat::run()
 			registration();
 			break;
 		case '2':
-			if (userData_.size() == 0)
+			if (!userData_.size())
 			{
 				std::cout << "\n There's no one in the chat room yet, so register first!\n";
 				break;
@@ -69,6 +71,8 @@ void Chat::showChatMenu()
 	do
 	{
 		std::cout << "\n To write a public message press 1, to go to the dialog press 2, to view chat press 3, press q to exit from chat menu: ";
+		std::cin.clear();
+		std::cin.ignore(std::cin.rdbuf()->in_avail());
 		std::cin >> action;
 		switch (action)
 		{
@@ -196,6 +200,8 @@ void Chat::sendMessage()
 				{
 					char query = '0';
 					std::cout << "\n to send a message press 1, to view the conversation press 2, to leave the dialog press q: ";
+					std::cin.clear();
+					std::cin.ignore(std::cin.rdbuf()->in_avail());
 					std::cin >> query;
 					if (query == '1')
 					{
@@ -266,20 +272,32 @@ void Chat::showDialog(const std::string& recipient)
 	if (dialog != pvtMsgData_.end() && reverseDialog == pvtMsgData_.end())
 	{
 		for (dialog; dialog != pvtMsgData_.end(); ++dialog)
-			std::cout << dialog->second;
+		{
+			if(dialog->first == std::make_pair(currentUser_->getLogin(), recipient))
+				std::cout << dialog->second;
+		}
 	}
 	else if (reverseDialog != pvtMsgData_.end() && dialog == pvtMsgData_.end())
 	{
 		for (reverseDialog; reverseDialog != pvtMsgData_.end(); ++reverseDialog)
-			std::cout << reverseDialog->second;
+		{
+			if(reverseDialog->first == std::make_pair(recipient, currentUser_->getLogin()))
+				std::cout << reverseDialog->second;
+		}
 	}
 	else if (dialog != pvtMsgData_.end() && reverseDialog != pvtMsgData_.end())
 	{
 		std::map<std::string, Message> temp;
 		for (dialog; dialog != pvtMsgData_.end(); ++dialog)
-			temp.emplace(dialog->second.getSendinTime(), dialog->second);
+		{
+			if (dialog->first == std::make_pair(currentUser_->getLogin(), recipient))
+				temp.emplace(dialog->second.getSendinTime(), dialog->second);
+		}
 		for (reverseDialog; reverseDialog != pvtMsgData_.end(); ++reverseDialog)
-			temp.emplace(reverseDialog->second.getSendinTime(), reverseDialog->second);
+		{
+			if (reverseDialog->first == std::make_pair(recipient, currentUser_->getLogin()))
+				temp.emplace(reverseDialog->second.getSendinTime(), reverseDialog->second);
+		}
 		for (const auto& t : temp)
 			std::cout << t.second;
 	}
